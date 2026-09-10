@@ -17,8 +17,8 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent
 
 # Server Settings
-HOST = os.getenv("FLASK_HOST", "127.0.0.1")
-PORT = int(os.getenv("FLASK_PORT", 5000))
+HOST = os.getenv("FLASK_HOST", os.getenv("HOST", "0.0.0.0"))
+PORT = int(os.getenv("PORT", os.getenv("FLASK_PORT", 5000)))
 DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
 SECRET_KEY = os.getenv("SECRET_KEY", "3d-printing-defect-detection-secret-key-2026")
 
