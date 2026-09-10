@@ -16,9 +16,17 @@ load_dotenv()
 # Base Project Directory
 BASE_DIR = Path(__file__).resolve().parent
 
+def _parse_port(default: int = 8080) -> int:
+    """Safely parse PORT from environment variable, handling strings like '$PORT'."""
+    raw = os.getenv("PORT", os.getenv("FLASK_PORT", str(default)))
+    try:
+        return int(raw)
+    except (ValueError, TypeError):
+        return default
+
 # Server Settings
 HOST = os.getenv("FLASK_HOST", os.getenv("HOST", "0.0.0.0"))
-PORT = int(os.getenv("PORT", os.getenv("FLASK_PORT", 5000)))
+PORT = _parse_port(8080)
 DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
 SECRET_KEY = os.getenv("SECRET_KEY", "3d-printing-defect-detection-secret-key-2026")
 
