@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python311", "libGL", "glib"]
+nixPkgs = ["python311", "libGL", "glib", "xorg.libxcb", "xorg.libX11", "xorg.libXext", "xorg.libSM"]
 
 [start]
 cmd = "python app.py"
