@@ -1,0 +1,121 @@
+<div class="live-inspection-page">
+  <!-- Live Stream Grid -->
+  <div class="inspection-grid">
+    <!-- Camera Viewport Card -->
+    <div class="media-viewer-card">
+      <div class="card-title" style="padding: 1rem 1.5rem 0 1.5rem;">
+        <span>Webcam Stream Monitor</span>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span class="badge" id="live-cam-indicator" style="background: var(--bg-tertiary); color: var(--text-secondary);">Offline</span>
+        </div>
+      </div>
+
+      <div class="live-viewport" id="live-viewport-box">
+        <!-- Live Stream Element -->
+        <img id="live-stream-feed" class="live-stream-img" src="" alt="Webcam Feed" style="display: none;">
+
+        <div class="live-fps-pill" id="live-fps-pill" style="display: none;">
+          FPS: <span id="live-fps-val">0.0</span>
+        </div>
+
+        <!-- Camera Offline Placeholder -->
+        <div class="viewport-placeholder" id="live-offline-placeholder">
+          <div class="viewport-placeholder-icon">📷</div>
+          <p style="font-weight: 600;">Camera is currently stopped</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Click "Start Camera" to initiate live defect monitoring.</p>
+        </div>
+
+        <!-- Camera Error Notice -->
+        <div id="live-camera-error-banner" style="display: none; padding: 1.25rem; text-align: center; color: #fca5a5; background: rgba(127, 29, 29, 0.92); position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 0.6rem; z-index: 10; overflow-y: auto;">
+          <div style="font-size: 2rem;">⚠️</div>
+          <div style="font-weight: 700; font-size: 1.05rem;">Camera Not Accessible</div>
+          <div style="font-size: 0.82rem; max-width: 440px; line-height: 1.35;" id="live-cam-error-text">
+            Check whether the webcam is connected and not being used by another application.
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.76rem; text-align: left; max-width: 440px; color: #fecaca;">
+            <strong style="color: #fff;">How to fix in Windows:</strong>
+            <ol style="margin: 0.2rem 0 0 1rem; padding: 0; line-height: 1.4;">
+              <li>Open <strong>Windows Settings</strong> (Win + I) ➔ <strong>Privacy & security</strong> ➔ <strong>Camera</strong>.</li>
+              <li>Toggle <strong>"Let desktop apps access your camera"</strong> to <strong>ON</strong>.</li>
+              <li>Close any app using the camera (Zoom, Teams, Camera app).</li>
+              <li>Select your USB camera in the <strong>Device dropdown</strong> below and click <strong>Start Camera</strong>.</li>
+            </ol>
+          </div>
+          <button class="btn btn-secondary" onclick="liveCamera.dismissError()" style="padding: 0.25rem 0.75rem; font-size: 0.78rem;">
+            Dismiss
+          </button>
+        </div>
+      </div>
+
+      <div class="viewer-controls" style="flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <label for="camera-select" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Device:</label>
+            <select id="camera-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem; min-width: 170px;">
+              <option value="0">Cam 0: Scanning...</option>
+            </select>
+            <button class="btn btn-secondary" id="btn-refresh-cams" title="Scan / Refresh Available Cameras" onclick="liveCamera.loadCameraDevices()" style="padding: 0.3rem 0.55rem; font-size: 0.82rem;">
+              🔄
+            </button>
+          </div>
+
+          <button class="btn btn-success" id="btn-start-cam" onclick="liveCamera.start()">
+            ▶ Start Camera
+          </button>
+          <button class="btn btn-danger" id="btn-stop-cam" onclick="liveCamera.stop()" disabled>
+            ⏹ Stop Camera
+          </button>
+        </div>
+
+        <button class="btn btn-secondary" id="btn-snap-cam" onclick="liveCamera.saveSnapshot()" disabled>
+          📸 Save Defect Frame
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Telemetry & Alerts -->
+    <div class="results-panel">
+      <!-- Status Card -->
+      <div class="status-summary-card" id="live-status-card">
+        <div class="status-pill unknown" id="live-status-pill">OFFLINE</div>
+        <div class="status-heading" id="live-status-heading">Awaiting Feed</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);" id="live-defect-label">
+          No live detections active
+        </div>
+      </div>
+
+      <!-- Realtime Metrics -->
+      <div class="detail-metrics-grid">
+        <div class="metric-box">
+          <div class="metric-box-label">Live Confidence</div>
+          <div class="metric-box-value" id="live-conf-val">--%</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Detection Count</div>
+          <div class="metric-box-value" id="live-count-val">0</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Stream FPS</div>
+          <div class="metric-box-value" id="live-fps-metric-val">0.0</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Device Index</div>
+          <div class="metric-box-value" id="live-device-idx-val">Cam 0</div>
+        </div>
+      </div>
+
+      <!-- Recent Captured Snapshots Gallery -->
+      <div class="detections-list-container">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
+          <span>Recent Defect Snapshots</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Auto-saved on defect</span>
+        </div>
+        <div id="live-snapshots-list">
+          <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 1rem;">
+            No snapshots recorded this session.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

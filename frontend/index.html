@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Defect Detection in 3D Printing Component Using Deep Convolutional Neural Network</title>
+  <meta name="description" content="Automated Defect Detection in 3D Printing Component using Deep Convolutional Neural Network and YOLO.">
+
+  <!-- Core Stylesheets -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <link rel="stylesheet" href="/css/inspection.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">3D</div>
+      <div>
+        <div class="sidebar-title">DefectVision AI</div>
+        <div class="sidebar-subtitle">3D Print Quality Suite</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-link active" data-page="dashboard" id="nav-dashboard">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-link" data-page="live-inspection" id="nav-live">
+        <span class="nav-icon">📷</span>
+        <span>Live Inspection</span>
+      </a>
+      <a class="nav-link" data-page="image-inspection" id="nav-image">
+        <span class="nav-icon">🖼️</span>
+        <span>Image Inspection</span>
+      </a>
+      <a class="nav-link" data-page="video-inspection" id="nav-video">
+        <span class="nav-icon">🎥</span>
+        <span>Video Inspection</span>
+      </a>
+      <a class="nav-link" data-page="history" id="nav-history">
+        <span class="nav-icon">📜</span>
+        <span>Inspection History</span>
+      </a>
+      <a class="nav-link" data-page="model-performance" id="nav-model">
+        <span class="nav-icon">🧠</span>
+        <span>Model Performance</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>Engine: YOLOv8 / YOLOv11</div>
+      <div class="system-status-indicator">
+        <span class="status-dot online" id="sys-status-dot"></span>
+        <span id="sys-status-text">System Online</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Application Wrapper -->
+  <div class="main-wrapper">
+    <!-- Top Navigation Header -->
+    <header class="top-navbar">
+      <div class="top-navbar-main">
+        <div class="top-navbar-title-container">
+          <h1 class="top-project-title">Automated Defect Detection in 3D Printing Component Using Deep Convolutional Neural Network</h1>
+          <div class="top-navbar-breadcrumb">
+            <span class="breadcrumb-label">Active Module:</span>
+            <span class="breadcrumb-current" id="current-page-title">Dashboard & Analytics</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div id="model-status-badge" class="badge badge-model-ok">
+          <span>●</span> <span id="model-status-text">Model: Checking...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Missing Model Warning Banner -->
+    <div id="model-warning-banner" class="alert-banner hidden">
+      <div>
+        <strong>⚠️ Attention:</strong> Trained model not found. Add <code>models/trained/best.pt</code> to enable AI defect detection.
+      </div>
+      <button class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;" onclick="app.navigateTo('model-performance')">
+        Setup Guide
+      </button>
+    </div>
+
+    <!-- Dynamic Content Body Container -->
+    <main class="content-body" id="app-view-container">
+      <div class="viewport-placeholder" style="min-height: 50vh;">
+        <div class="spinner"></div>
+        <p>Loading application interface...</p>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal Container for Record Details -->
+<div id="app-modal" class="modal-backdrop">
+  <div class="modal-content" id="modal-body-container">
+    <!-- Dynamic Modal Injected Here -->
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Application JavaScript Modules -->
+<script src="/js/charts.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/image-inspection.js"></script>
+<script src="/js/video-inspection.js"></script>
+<script src="/js/live-camera.js"></script>
+<script src="/js/history.js"></script>
+<script src="/js/app.js"></script>
+
+</body>
+</html>

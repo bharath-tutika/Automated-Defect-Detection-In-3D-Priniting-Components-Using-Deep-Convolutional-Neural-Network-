@@ -1,0 +1,116 @@
+<div class="model-performance-page">
+  <!-- Model Information & Architecture Specifications -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>AI Model Specifications</span>
+      <span class="badge badge-model-ok" id="perf-model-status-badge">Checking...</span>
+    </div>
+
+    <div class="dashboard-stats-grid" style="margin-bottom: 1.5rem;">
+      <div class="metric-box">
+        <div class="metric-box-label">Architecture</div>
+        <div class="metric-box-value">Ultralytics YOLO</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">Confidence Threshold</div>
+        <div class="metric-box-value" id="perf-conf-val">0.50</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">IoU NMS Threshold</div>
+        <div class="metric-box-value" id="perf-iou-val">0.45</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-box-label">Inference Dimensions</div>
+        <div class="metric-box-value" id="perf-size-val">640 x 640</div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; font-weight: 600;">
+        Configured Model Path:
+      </div>
+      <code id="perf-model-path-code" style="background: var(--bg-primary); padding: 0.5rem 1rem; border-radius: var(--radius-md); display: block; word-break: break-all; color: #38bdf8;">
+        models/trained/best.pt
+      </code>
+    </div>
+  </div>
+
+  <!-- Supported Defect Classes Table -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>Registered Defect Classes (Central Config)</span>
+      <span class="badge" style="background: var(--bg-tertiary); color: var(--text-secondary);" id="perf-class-count-badge">7 Classes</span>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Class ID</th>
+            <th>Identifier (YOLO)</th>
+            <th>Display Label</th>
+            <th>Classification Type</th>
+          </tr>
+        </thead>
+        <tbody id="perf-classes-table-body">
+          <!-- Populated dynamically from /api/model/info -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empirical Training & Validation Metrics -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>Empirical Validation Metrics</span>
+      <span class="badge" style="background: var(--bg-tertiary); color: var(--text-secondary);">Actual Evaluated Data</span>
+    </div>
+
+    <!-- Container for metrics if present -->
+    <div id="perf-metrics-container" style="display: none;">
+      <div class="dashboard-stats-grid" id="perf-metrics-kpi-grid">
+        <!-- Dynamically filled with precision, recall, mAP50, mAP50-95 if metrics.txt exists -->
+      </div>
+
+      <div class="charts-grid-equal" style="margin-top: 1.5rem;">
+        <div class="card" style="background: var(--bg-secondary);">
+          <div class="card-title" style="font-size: 0.95rem;">Confusion Matrix</div>
+          <div style="text-align: center; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+            <img id="perf-cm-img" src="" alt="Confusion Matrix" style="max-width: 100%; border-radius: var(--radius-md);">
+          </div>
+        </div>
+
+        <div class="card" style="background: var(--bg-secondary);">
+          <div class="card-title" style="font-size: 0.95rem;">Training Loss & Precision-Recall Curves</div>
+          <div style="text-align: center; min-height: 200px; display: flex; align-items: center; justify-content: center;">
+            <img id="perf-plot-img" src="" alt="Training Results" style="max-width: 100%; border-radius: var(--radius-md);">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state notice when no real metrics have been evaluated yet -->
+    <div id="perf-no-metrics-notice" style="text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+      <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📊</div>
+      <div style="font-size: 1.05rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Training metrics are not available yet.
+      </div>
+      <p style="font-size: 0.85rem; max-width: 500px; margin: 0 auto 1.5rem auto;">
+        Train and evaluate the YOLO model on your annotated 3D printing dataset using the provided training scripts.
+      </p>
+    </div>
+  </div>
+
+  <!-- Training Quick Reference -->
+  <div class="card">
+    <div class="card-title">How to Train & Evaluate Your Custom Model</div>
+    <div style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+      <p style="margin-bottom: 0.75rem;">1. Prepare your dataset images and annotations in <code>dataset/train</code> and <code>dataset/val</code> according to <code>dataset/data.yaml</code>.</p>
+      <p style="margin-bottom: 0.75rem;">2. Execute the model training pipeline:</p>
+      <pre style="background: var(--bg-primary); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 0.75rem; color: #a7f3d0;"><code>python training/train.py --epochs 50 --batch 16 --imgsz 640</code></pre>
+      <p style="margin-bottom: 0.75rem;">3. Run evaluation to compute precision, recall, mAP, and generate the confusion matrix:</p>
+      <pre style="background: var(--bg-primary); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 0.75rem; color: #a7f3d0;"><code>python training/evaluate.py</code></pre>
+      <p>4. The generated weights will automatically be saved to <code>models/trained/best.pt</code> and metrics will appear in this dashboard.</p>
+    </div>
+  </div>
+</div>

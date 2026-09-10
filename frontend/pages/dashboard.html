@@ -1,0 +1,112 @@
+<div class="dashboard-page">
+  <!-- Key Performance Metrics -->
+  <div class="dashboard-stats-grid">
+    <div class="stat-card stat-total">
+      <div class="stat-header">
+        <span class="stat-label">Total Inspections</span>
+        <div class="stat-icon">📈</div>
+      </div>
+      <div class="stat-value" id="stat-total-val">0</div>
+      <div class="stat-subtitle" id="stat-by-type-subtitle">0 Images | 0 Videos | 0 Live</div>
+    </div>
+
+    <div class="stat-card stat-good">
+      <div class="stat-header">
+        <span class="stat-label">Good Prints</span>
+        <div class="stat-icon">✅</div>
+      </div>
+      <div class="stat-value" id="stat-good-val">0</div>
+      <div class="stat-subtitle">Normal structural integrity</div>
+    </div>
+
+    <div class="stat-card stat-defect">
+      <div class="stat-header">
+        <span class="stat-label">Defects Detected</span>
+        <div class="stat-icon">⚠️</div>
+      </div>
+      <div class="stat-value" id="stat-defect-val">0</div>
+      <div class="stat-subtitle">Prints requiring intervention</div>
+    </div>
+
+    <div class="stat-card stat-rate">
+      <div class="stat-header">
+        <span class="stat-label">Defect Rate</span>
+        <div class="stat-icon">📊</div>
+      </div>
+      <div class="stat-value" id="stat-rate-val">0.0%</div>
+      <div class="stat-subtitle">Historical defect ratio</div>
+    </div>
+  </div>
+
+  <!-- Interactive Charts Grid -->
+  <div class="charts-grid">
+    <div class="card chart-card">
+      <div class="card-title">
+        <span>Defect Classes Distribution</span>
+        <span class="badge" style="background: var(--bg-tertiary); color: var(--text-secondary);">By Occurrence</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="chart-defect-distribution"></canvas>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="card-title">
+        <span>Good vs Defective</span>
+      </div>
+      <div class="chart-wrapper">
+        <canvas id="chart-good-vs-defect"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7-Day Activity Timeline -->
+  <div class="card chart-card" style="margin-bottom: 2rem;">
+    <div class="card-title">
+      <span>7-Day Inspection Activity</span>
+      <span class="badge" style="background: var(--bg-tertiary); color: var(--text-secondary);">Daily Volume</span>
+    </div>
+    <div class="chart-wrapper">
+      <canvas id="chart-activity-timeline"></canvas>
+    </div>
+  </div>
+
+  <!-- Quick Action Navigation -->
+  <div class="card">
+    <div class="card-title">Inspection Workflows</div>
+    <div class="quick-actions-grid">
+      <a class="action-card" onclick="app.navigateTo('image-inspection')">
+        <div class="action-card-header">
+          <div class="action-icon">🖼️</div>
+          <div>
+            <div class="action-title">Image Inspection</div>
+            <div class="action-desc">Upload and analyze single high-resolution print photos</div>
+          </div>
+        </div>
+        <span class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; width: 100%;">Open Mode →</span>
+      </a>
+
+      <a class="action-card" onclick="app.navigateTo('video-inspection')">
+        <div class="action-card-header">
+          <div class="action-icon">🎥</div>
+          <div>
+            <div class="action-title">Video Inspection</div>
+            <div class="action-desc">Frame-by-frame batch processing of timelapse print videos</div>
+          </div>
+        </div>
+        <span class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; width: 100%;">Open Mode →</span>
+      </a>
+
+      <a class="action-card" onclick="app.navigateTo('live-inspection')">
+        <div class="action-card-header">
+          <div class="action-icon">📷</div>
+          <div>
+            <div class="action-title">Live Camera</div>
+            <div class="action-desc">Real-time webcam monitoring with automated alerts</div>
+          </div>
+        </div>
+        <span class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; width: 100%;">Open Mode →</span>
+      </a>
+    </div>
+  </div>
+</div>

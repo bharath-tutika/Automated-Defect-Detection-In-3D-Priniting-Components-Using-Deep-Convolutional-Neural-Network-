@@ -1,0 +1,105 @@
+<div class="video-inspection-page">
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="vid-drop-zone">
+    <input type="file" id="vid-file-input" class="file-input-hidden" accept=".mp4,.avi,.mov,.mkv,.webm">
+    <div class="upload-icon">🎬</div>
+    <div class="upload-title">Drag & Drop 3D Print Video / Timelapse</div>
+    <div class="upload-subtitle">Supports MP4, AVI, MOV, MKV, WEBM (Max 50MB)</div>
+    <button type="button" class="btn btn-secondary" style="margin-top: 1rem;" onclick="document.getElementById('vid-file-input').click()">
+      Browse Video File
+    </button>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="inspection-grid" id="vid-workspace" style="display: none;">
+    <!-- Media Viewer -->
+    <div class="media-viewer-card">
+      <div class="card-title" style="padding: 1rem 1.5rem 0 1.5rem;">
+        <span id="vid-filename-title">Video Analysis Player</span>
+        <span class="badge" id="vid-fps-badge" style="background: var(--bg-tertiary); color: var(--text-secondary);">25 FPS</span>
+      </div>
+
+      <div class="media-viewport" id="vid-viewport-container">
+        <video id="vid-player-element" controls style="width: 100%; height: 100%; object-fit: contain;">
+          <source src="" id="vid-source-element">
+          Your browser does not support the video tag.
+        </video>
+        <div class="loading-overlay" id="vid-loading-overlay">
+          <div class="spinner"></div>
+          <p style="color: #fff; font-weight: 600;" id="vid-loading-text">Processing Video Frame-by-Frame...</p>
+          <div class="progress-bar-container" style="width: 80%;">
+            <div class="progress-bar-fill" id="vid-progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="viewer-controls">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <label style="font-size: 0.85rem; color: var(--text-secondary);">Frame Skip:</label>
+          <select id="vid-frame-skip" class="input-control" style="padding: 0.35rem 0.6rem; font-size: 0.85rem;">
+            <option value="1">1 (Every frame - Deep inspection)</option>
+            <option value="3" selected>3 (Standard - Balanced)</option>
+            <option value="5">5 (Fast - Accelerated)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-secondary" id="btn-reset-video" onclick="videoInspection.reset()">
+            ↺ Reset
+          </button>
+          <button class="btn btn-primary" id="btn-analyze-video" onclick="videoInspection.analyze()">
+            ⚡ Process Video
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+      <!-- Status Card -->
+      <div class="status-summary-card" id="vid-status-card">
+        <div class="status-pill unknown" id="vid-status-pill">Ready to Process</div>
+        <div class="status-heading" id="vid-status-heading">Upload a Video</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);" id="vid-defect-label">
+          Awaiting frame extraction and YOLO detection
+        </div>
+      </div>
+
+      <!-- Metrics Breakdown -->
+      <div class="detail-metrics-grid">
+        <div class="metric-box">
+          <div class="metric-box-label">Processed Frames</div>
+          <div class="metric-box-value" id="vid-frames-val">-- / --</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Defect Frames</div>
+          <div class="metric-box-value" id="vid-defect-frames-val">0</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Processing Time</div>
+          <div class="metric-box-value" id="vid-time-val">-- s</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Max Confidence</div>
+          <div class="metric-box-value" id="vid-conf-val">--%</div>
+        </div>
+      </div>
+
+      <!-- Defect Breakdown Summary -->
+      <div class="detections-list-container">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Defect Summary Breakdown
+        </div>
+        <div id="vid-defect-summary-list">
+          <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 1rem;">
+            No defect breakdown available.
+          </div>
+        </div>
+      </div>
+
+      <!-- Download Processed Video -->
+      <a id="btn-download-video-result" class="btn btn-secondary" style="display: none; width: 100%;" download>
+        ⬇️ Download Annotated Video
+      </a>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+# 3D Printing Defect Detection Dataset Configuration for YOLO
+# Format compliant with Ultralytics YOLOv8 / YOLOv11
+
+# Absolute path to dataset root (auto-resolved at runtime by training scripts)
+path: C:/Users/Bharath/.gemini/antigravity/scratch/3D-PRINTING-DEFECT-DETECTION/dataset
+
+train: train/images
+val: val/images
+test: test/images
+
+# Number of classes: 7
+nc: 7
+names:
+  0: normal
+  1: stringing
+  2: warping
+  3: layer_shift
+  4: under_extrusion
+  5: over_extrusion
+  6: spaghetti

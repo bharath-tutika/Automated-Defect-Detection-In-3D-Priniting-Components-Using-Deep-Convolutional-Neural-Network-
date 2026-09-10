@@ -1,0 +1,9 @@
+Model: best.pt
+Architecture: Ultralytics YOLO
+Precision: 0.7800
+Recall: 0.5220
+F1-Score: 0.6254
+mAP@50: 0.6092
+mAP@50-95: 0.3389
+Evaluated Image Size: 640
+Status: EVALUATED

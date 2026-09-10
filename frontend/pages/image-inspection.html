@@ -1,0 +1,92 @@
+<div class="image-inspection-page">
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="img-drop-zone">
+    <input type="file" id="img-file-input" class="file-input-hidden" accept=".jpg,.jpeg,.png,.webp,.bmp">
+    <div class="upload-icon">📁</div>
+    <div class="upload-title">Drag & Drop 3D Print Image Here</div>
+    <div class="upload-subtitle">Supports JPG, JPEG, PNG, WEBP, BMP (Max 50MB)</div>
+    <button type="button" class="btn btn-secondary" style="margin-top: 1rem;" onclick="document.getElementById('img-file-input').click()">
+      Browse Image
+    </button>
+  </div>
+
+  <!-- Workspace Grid -->
+  <div class="inspection-grid" id="img-workspace" style="display: none;">
+    <!-- Media Viewer -->
+    <div class="media-viewer-card">
+      <div class="card-title" style="padding: 1rem 1.5rem 0 1.5rem;">
+        <span id="img-filename-title">Image View</span>
+        <div class="btn-group" id="img-toggle-view-group" style="display: none; gap: 0.5rem;">
+          <button class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" id="btn-show-annotated" onclick="imageInspection.switchView('annotated')">Annotated</button>
+          <button class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.8rem;" id="btn-show-original" onclick="imageInspection.switchView('original')">Original</button>
+        </div>
+      </div>
+
+      <div class="media-viewport" id="img-viewport-container">
+        <img id="img-preview-element" src="" alt="3D Print Preview">
+        <div class="loading-overlay" id="img-loading-overlay">
+          <div class="spinner"></div>
+          <p style="color: #fff; font-weight: 600;">Running YOLO Defect Inference...</p>
+        </div>
+      </div>
+
+      <div class="viewer-controls">
+        <button class="btn btn-secondary" id="btn-reset-image" onclick="imageInspection.reset()">
+          ↺ Reset Image
+        </button>
+        <button class="btn btn-primary" id="btn-analyze-image" onclick="imageInspection.analyze()">
+          ⚡ Analyze Image
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Panel -->
+    <div class="results-panel">
+      <!-- Status Card -->
+      <div class="status-summary-card" id="img-status-card">
+        <div class="status-pill unknown" id="img-status-pill">Ready to Inspect</div>
+        <div class="status-heading" id="img-status-heading">Upload an Image</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);" id="img-defect-label">
+          Defect analysis pending execution
+        </div>
+      </div>
+
+      <!-- Metrics Breakdown -->
+      <div class="detail-metrics-grid">
+        <div class="metric-box">
+          <div class="metric-box-label">Confidence</div>
+          <div class="metric-box-value" id="img-conf-val">--%</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Processing Time</div>
+          <div class="metric-box-value" id="img-time-val">-- ms</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Defects Count</div>
+          <div class="metric-box-value" id="img-defect-count-val">0</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-box-label">Inspection ID</div>
+          <div class="metric-box-value" id="img-inspection-id-val">#--</div>
+        </div>
+      </div>
+
+      <!-- Detections List -->
+      <div class="detections-list-container">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.75rem;">
+          Detected Objects & Bounding Boxes
+        </div>
+        <div id="img-detections-list">
+          <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 1rem;">
+            No detections yet. Click "Analyze Image" to run detection.
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Action -->
+      <a id="btn-download-result" class="btn btn-secondary" style="display: none; width: 100%;" download>
+        ⬇️ Download Annotated Image
+      </a>
+    </div>
+  </div>
+</div>

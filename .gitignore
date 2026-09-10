@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# System and logs
+logs/*.log
+*.log
+.DS_Store
+Thumbs.db
+
+# Results and uploads temporary files (keep directories)
+uploads/images/*
+!uploads/images/.gitkeep
+uploads/videos/*
+!uploads/videos/.gitkeep
+uploads/temporary/*
+!uploads/temporary/.gitkeep
+
+results/images/*
+!results/images/.gitkeep
+results/videos/*
+!results/videos/.gitkeep
+results/live_frames/*
+!results/live_frames/.gitkeep
+results/reports/*
+!results/reports/.gitkeep
+
+# Database (keep sample or blank)
+database/*.db-journal
+
+# Testing & Ultralytics runtime artifacts
+runs/
+.pytest_cache/
+
+# Models (keep directory structure)
+models/trained/*.pt
+!models/trained/.gitkeep
+models/pretrained/*.pt
+!models/pretrained/.gitkeep
+models/exports/*.onnx
+models/exports/*.engine
+*.pt
+
+# IDE
+.vscode/
+.idea/
+*.swp

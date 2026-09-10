@@ -1,0 +1,80 @@
+<div class="history-page">
+  <!-- Filter & Search Controls -->
+  <div class="table-filter-bar">
+    <input type="text" id="history-search-input" class="input-control" placeholder="🔍 Search by file, defect, or source..." style="flex: 1; min-width: 240px;">
+
+    <select id="history-filter-type" class="input-control">
+      <option value="all">All Inspection Types</option>
+      <option value="image">Image Inspection</option>
+      <option value="video">Video Inspection</option>
+      <option value="live">Live Stream Snapshot</option>
+    </select>
+
+    <select id="history-filter-status" class="input-control">
+      <option value="ALL">All Statuses</option>
+      <option value="GOOD">Good Prints Only</option>
+      <option value="DEFECT">Defects Only</option>
+    </select>
+
+    <select id="history-filter-defect" class="input-control">
+      <option value="all">All Defect Classes</option>
+      <option value="Normal">Normal / Good</option>
+      <option value="Stringing">Stringing</option>
+      <option value="Warping">Warping</option>
+      <option value="Layer Shift">Layer Shift</option>
+      <option value="Under-Extrusion">Under-Extrusion</option>
+      <option value="Over-Extrusion">Over-Extrusion</option>
+      <option value="Spaghetti">Spaghetti</option>
+    </select>
+
+    <button class="btn btn-secondary" onclick="historyManager.resetFilters()">
+      ↺ Reset Filters
+    </button>
+
+    <a href="/api/history/export-excel" class="btn btn-primary" download="3D_Printing_Defect_Inspection_Results_Output.xlsx" style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+      📥 Export Excel Sheet
+    </a>
+  </div>
+
+  <!-- Records Table -->
+  <div class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Date / Time</th>
+          <th>File Reference</th>
+          <th>Status</th>
+          <th>Defect Summary</th>
+          <th>Confidence</th>
+          <th>Time</th>
+          <th style="text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="history-table-body">
+        <tr>
+          <td colspan="9" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+            <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+            Loading inspection records...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Bar -->
+  <div class="pagination-bar">
+    <div style="font-size: 0.85rem; color: var(--text-muted);" id="history-page-info">
+      Showing 0 of 0 records
+    </div>
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="btn btn-secondary" id="btn-prev-page" onclick="historyManager.prevPage()" disabled>
+        ← Previous
+      </button>
+      <button class="btn btn-secondary" id="btn-next-page" onclick="historyManager.nextPage()" disabled>
+        Next →
+      </button>
+    </div>
+  </div>
+</div>
