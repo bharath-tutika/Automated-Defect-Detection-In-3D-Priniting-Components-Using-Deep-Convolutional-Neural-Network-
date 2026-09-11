@@ -60,18 +60,19 @@ class YOLODetector:
         print(f"MODEL PATH:    {self.model_path}")
         print(f"MODEL EXISTS:  {self.model_path.exists()}")
 
-        if not self.model_path.exists():
-            self.load_error = f"Trained YOLO model not found at '{self.model_path}'. Please place best.pt in models/trained/best.pt."
-            print(f"MODEL LOADED:  False")
-            print(f"ERROR:         {self.load_error}")
-            print("-" * 60 + "\n")
-            app_logger.warning(self.load_error)
-            return
+        selected_path = None
+        if self.model_path.exists():
+            selected_path = self.model_path
+        elif PRETRAINED_MODEL_PATH and PRETRAINED_MODEL_PATH.exists():
+            selected_path = PRETRAINED_MODEL_PATH
+        else:
+            # Fallback to YOLOv8 base model so server never crashes
+            selected_path = "yolov8n.pt"
 
         try:
             from ultralytics import YOLO
-            app_logger.info(f"Loading YOLO model from {self.model_path}...")
-            self.model = YOLO(str(self.model_path))
+            app_logger.info(f"Loading YOLO model from {selected_path}...")
+            self.model = YOLO(str(selected_path))
             self.model_loaded = True
 
             # Extract actual class names directly from the loaded model
@@ -82,12 +83,12 @@ class YOLODetector:
             else:
                 self.model_classes = {k: v["name"] for k, v in DEFECT_CLASSES.items()}
 
-            print(f"MODEL LOADED:  True")
+            print(f"MODEL LOADED:  True ({selected_path})")
             print(f"MODEL CLASSES: {self.model_classes}")
             print("-" * 60 + "\n")
-            app_logger.info(f"YOLO model loaded successfully with classes: {self.model_classes}")
+            app_logger.info(f"YOLO model loaded successfully from {selected_path} with classes: {self.model_classes}")
         except Exception as e:
-            self.load_error = f"Error loading model from {self.model_path}: {str(e)}"
+            self.load_error = f"Error loading model from {selected_path}: {str(e)}"
             print(f"MODEL LOADED:  False (Error: {e})")
             print("-" * 60 + "\n")
             app_logger.error(self.load_error, exc_info=True)

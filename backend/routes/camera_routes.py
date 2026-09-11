@@ -145,3 +145,105 @@ def capture_snapshot():
     except Exception as e:
         app_logger.error(f"Snapshot error: {e}")
         return api_error(f"Failed to capture frame: {str(e)}", status_code=500)
+
+
+@camera_bp.route("/process_frame", methods=["POST"])
+def process_camera_frame():
+    """
+    Process a single video frame sent directly from the client web browser (Webcam getUserMedia).
+    Works seamlessly in cloud deployments without server hardware webcams.
+    """
+    import base64
+    import numpy as np
+    import cv2
+    from backend.detection.detector import YOLODetector
+    from backend.preprocessing.image_preprocessing import safe_write_image
+    from backend.database.database import get_db_session
+    from backend.database.crud import create_inspection_record
+    from backend.utils.file_handler import generate_unique_filename
+    from config import RESULT_LIVE_FRAMES_DIR, CONFIDENCE_THRESHOLD
+
+    try:
+        data = request.get_json(silent=True) or {}
+        image_data = data.get("image")
+        if not image_data:
+            return api_error("No image frame provided", status_code=400)
+
+        # Strip data URL prefix if present
+        if "," in image_data:
+            image_data = image_data.split(",", 1)[1]
+
+        # Decode base64 to image
+        img_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(img_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        if frame is None:
+            return api_error("Failed to decode camera frame", status_code=400)
+
+        # Run AI defect detection
+        detector = YOLODetector.get_instance()
+        inference = detector.predict(frame)
+
+        # Render bounding boxes and annotations
+        status = inference.get("status", "GOOD")
+        detections = inference.get("detections", [])
+        fps = float(data.get("fps", 0.0))
+        annotated_frame = detector.draw_annotations(frame, detections, status=status, fps=fps)
+
+        # Encode annotated image back to base64 for real-time display
+        _, buffer = cv2.imencode(".jpg", annotated_frame, [int(cv2.IMWRITE_JPEG_QUALITY), 80])
+        annotated_b64 = "data:image/jpeg;base64," + base64.b64encode(buffer).decode("utf-8")
+
+        # Handle save snapshot request if requested
+        save_snapshot = data.get("save_snapshot", False)
+        saved_record = None
+
+        if save_snapshot:
+            timestamp_str = cv2.getTickCount()
+            filename = generate_unique_filename(f"webcam_snapshot_{timestamp_str}.jpg")
+            save_path = RESULT_LIVE_FRAMES_DIR / filename
+            safe_write_image(save_path, annotated_frame)
+
+            with get_db_session() as session:
+                rec = create_inspection_record(
+                    session=session,
+                    inspection_type="live",
+                    status=status,
+                    original_filename=filename,
+                    result_filename=filename,
+                    defect_type=inference.get("dominant_defect", "Normal / Good Print"),
+                    confidence=inference.get("max_confidence", 0.0),
+                    processing_time=inference.get("processing_time_ms", 0.0),
+                    source="Browser Web Camera",
+                    notes=f"Browser webcam inspection snapshot. Detections count: {len(detections)}",
+                    detections=detections,
+                )
+                saved_record = {
+                    "inspection_id": rec.id,
+                    "filename": filename,
+                    "image_url": f"/results/live_frames/{filename}",
+                    "status": status,
+                    "defect_type": inference.get("dominant_defect", "Normal / Good Print"),
+                    "confidence": inference.get("max_confidence", 0.0),
+                }
+
+        return api_success(
+            data={
+                "status": status,
+                "dominant_defect": inference.get("dominant_defect", "Normal / Good Print"),
+                "confidence": inference.get("max_confidence", 0.0),
+                "confidence_percentage": inference.get("confidence_percentage", 0.0),
+                "detection_count": len(detections),
+                "detections": detections,
+                "processing_time_ms": inference.get("processing_time_ms", 0.0),
+                "annotated_image": annotated_b64,
+                "saved_snapshot": saved_record,
+                "model_available": inference.get("model_available", True),
+            },
+            message="Frame processed successfully.",
+        )
+    except Exception as e:
+        app_logger.error(f"Error processing camera frame: {e}", exc_info=True)
+        return api_error(f"Frame processing error: {str(e)}", status_code=500)
+

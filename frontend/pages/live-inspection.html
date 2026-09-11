@@ -11,8 +11,12 @@
       </div>
 
       <div class="live-viewport" id="live-viewport-box">
-        <!-- Live Stream Element -->
-        <img id="live-stream-feed" class="live-stream-img" src="" alt="Webcam Feed" style="display: none;">
+        <!-- Live Stream Element (Server MJPEG / Browser Canvas Image) -->
+        <img id="live-stream-feed" class="live-stream-img" src="" alt="Webcam Feed" style="display: none; width: 100%; height: 100%; object-fit: contain;">
+
+        <!-- Client-side Browser Webcam Video & Processing Canvas (Hidden) -->
+        <video id="live-browser-video" autoplay playsinline muted style="display: none;"></video>
+        <canvas id="live-browser-canvas" style="display: none;"></canvas>
 
         <div class="live-fps-pill" id="live-fps-pill" style="display: none;">
           FPS: <span id="live-fps-val">0.0</span>
@@ -22,24 +26,15 @@
         <div class="viewport-placeholder" id="live-offline-placeholder">
           <div class="viewport-placeholder-icon">📷</div>
           <p style="font-weight: 600;">Camera is currently stopped</p>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">Click "Start Camera" to initiate live defect monitoring.</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Click "Start Camera" to initiate live AI defect monitoring.</p>
         </div>
 
         <!-- Camera Error Notice -->
         <div id="live-camera-error-banner" style="display: none; padding: 1.25rem; text-align: center; color: #fca5a5; background: rgba(127, 29, 29, 0.92); position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 0.6rem; z-index: 10; overflow-y: auto;">
           <div style="font-size: 2rem;">⚠️</div>
-          <div style="font-weight: 700; font-size: 1.05rem;">Camera Not Accessible</div>
+          <div style="font-weight: 700; font-size: 1.05rem;">Camera Permission or Access Error</div>
           <div style="font-size: 0.82rem; max-width: 440px; line-height: 1.35;" id="live-cam-error-text">
-            Check whether the webcam is connected and not being used by another application.
-          </div>
-          <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 0.6rem 0.85rem; font-size: 0.76rem; text-align: left; max-width: 440px; color: #fecaca;">
-            <strong style="color: #fff;">How to fix in Windows:</strong>
-            <ol style="margin: 0.2rem 0 0 1rem; padding: 0; line-height: 1.4;">
-              <li>Open <strong>Windows Settings</strong> (Win + I) ➔ <strong>Privacy & security</strong> ➔ <strong>Camera</strong>.</li>
-              <li>Toggle <strong>"Let desktop apps access your camera"</strong> to <strong>ON</strong>.</li>
-              <li>Close any app using the camera (Zoom, Teams, Camera app).</li>
-              <li>Select your USB camera in the <strong>Device dropdown</strong> below and click <strong>Start Camera</strong>.</li>
-            </ol>
+            Please allow browser camera permissions when prompted.
           </div>
           <button class="btn btn-secondary" onclick="liveCamera.dismissError()" style="padding: 0.25rem 0.75rem; font-size: 0.78rem;">
             Dismiss
@@ -50,13 +45,11 @@
       <div class="viewer-controls" style="flex-wrap: wrap; gap: 0.75rem;">
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.35rem;">
-            <label for="camera-select" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Device:</label>
-            <select id="camera-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem; min-width: 170px;">
-              <option value="0">Cam 0: Scanning...</option>
+            <label for="camera-mode-select" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Source:</label>
+            <select id="camera-mode-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem;">
+              <option value="browser" selected>🌐 Browser Webcam (Cloud / Local)</option>
+              <option value="server">🖥️ Server Hardware Camera</option>
             </select>
-            <button class="btn btn-secondary" id="btn-refresh-cams" title="Scan / Refresh Available Cameras" onclick="liveCamera.loadCameraDevices()" style="padding: 0.3rem 0.55rem; font-size: 0.82rem;">
-              🔄
-            </button>
           </div>
 
           <button class="btn btn-success" id="btn-start-cam" onclick="liveCamera.start()">

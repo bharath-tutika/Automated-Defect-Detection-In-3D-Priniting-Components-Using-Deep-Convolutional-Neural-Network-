@@ -39,14 +39,11 @@ database/*.db-journal
 runs/
 .pytest_cache/
 
-# Models (keep directory structure)
-models/trained/*.pt
-!models/trained/.gitkeep
-models/pretrained/*.pt
-!models/pretrained/.gitkeep
+# Models (keep trained weights for deployment)
+!backend/models/trained/best.pt
+!backend/models/pretrained/yolo_base.pt
 models/exports/*.onnx
 models/exports/*.engine
-*.pt
 
 # IDE
 .vscode/
