@@ -99,6 +99,15 @@ def create_app() -> Flask:
         """Serve training evaluation plots and confusion matrix images."""
         return send_from_directory(str(TRAINING_RESULTS_DIR), filename)
 
+    @app.after_request
+    def add_header(response):
+        """Disable caching for static dynamic assets in development/production."""
+        if "Cache-Control" not in response.headers:
+            response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
+
     # ----------------------------------------------------
     # Error Handlers
     # ----------------------------------------------------
