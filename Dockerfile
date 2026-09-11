@@ -31,4 +31,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "4", "--timeout", "120", "app:app"]
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "app:app"]

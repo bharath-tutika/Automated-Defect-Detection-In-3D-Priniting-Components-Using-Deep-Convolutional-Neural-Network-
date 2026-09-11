@@ -1,4 +1,4 @@
-python<div class="history-page">
+<div class="history-page">
   <!-- Filter & Search Controls -->
   <div class="table-filter-bar">
     <input type="text" id="history-search-input" class="input-control"
@@ -32,11 +32,10 @@ python<div class="history-page">
       ↺ Reset Filters
     </button>
 
-    <a href="/api/history/export-excel" class="btn btn-primary"
-      download="3D_Printing_Defect_Inspection_Results_Output.xlsx"
-      style="text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+    <button class="btn btn-primary" id="btn-export-excel" onclick="historyManager.exportExcel()"
+      style="display: inline-flex; align-items: center; gap: 0.5rem;">
       📥 Export Excel Sheet
-    </a>
+    </button>
   </div>
 
   <!-- Records Table -->

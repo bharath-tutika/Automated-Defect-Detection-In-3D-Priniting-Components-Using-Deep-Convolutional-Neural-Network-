@@ -130,11 +130,14 @@ const historyManager = {
           <td style="font-weight: 600; color: ${isDefect ? 'var(--status-defect)' : 'var(--status-good)'};">${confDisplay}</td>
           <td style="color: var(--text-muted); font-size: 0.85rem;">${timeDisplay}</td>
           <td style="text-align: right;">
-            <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
-              <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="historyManager.viewRecord(${item.id})">
-                View 🔍
+            <div style="display: flex; gap: 0.35rem; justify-content: flex-end; align-items: center;">
+              <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="historyManager.viewRecord(${item.id})" title="View Details">
+                🔍 View
               </button>
-              <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="historyManager.deleteRecord(${item.id})">
+              <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; background: rgba(43, 108, 176, 0.15); border-color: rgba(43, 108, 176, 0.3); color: #63B3ED;" onclick="historyManager.exportExcel(${item.id})" title="Export Inspection #${item.id} to Excel">
+                📥 Excel
+              </button>
+              <button class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="historyManager.deleteRecord(${item.id})" title="Delete Record">
                 🗑️
               </button>
             </div>
@@ -181,6 +184,110 @@ const historyManager = {
     if (d) d.value = 'all';
     this.currentPage = 1;
     this.fetchHistory();
+  },
+
+  async exportExcel(inspectionId = null) {
+    const exportBtn = document.getElementById('btn-export-excel');
+    let originalText = '';
+    if (!inspectionId && exportBtn) {
+      originalText = exportBtn.innerHTML;
+      exportBtn.innerHTML = '⏳ Generating...';
+      exportBtn.disabled = true;
+    }
+
+    try {
+      let url = '/api/history/export-excel';
+      let filename = '3D_Printing_Defect_Inspection_Results_Output.xlsx';
+
+      if (inspectionId) {
+        url = `/api/history/export-excel/${inspectionId}`;
+        filename = `Inspection_Report_#${inspectionId}.xlsx`;
+        if (window.app && app.showToast) {
+          app.showToast(`Generating Excel for Inspection #${inspectionId}...`, 'info');
+        }
+      } else {
+        const search = document.getElementById('history-search-input')?.value || '';
+        const type = document.getElementById('history-filter-type')?.value || 'all';
+        const status = document.getElementById('history-filter-status')?.value || 'ALL';
+        const defect = document.getElementById('history-filter-defect')?.value || 'all';
+
+        const params = new URLSearchParams();
+        const activeLabels = [];
+        if (search) {
+          params.append('search', search);
+          activeLabels.push(`Search_${search.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 12)}`);
+        }
+        if (type !== 'all') {
+          params.append('type', type);
+          activeLabels.push(`Type_${type}`);
+        }
+        if (status !== 'ALL') {
+          params.append('status', status);
+          activeLabels.push(`Status_${status}`);
+        }
+        if (defect !== 'all') {
+          params.append('defect', defect);
+          activeLabels.push(`Defect_${defect.replace(/\s+/g, '_')}`);
+        }
+
+        if (activeLabels.length > 0) {
+          filename = `Inspection_Export_${activeLabels.join('_')}.xlsx`;
+          url += `?${params.toString()}`;
+          if (window.app && app.showToast) {
+            app.showToast(`Generating filtered Excel (${activeLabels.join(', ')})...`, 'info');
+          }
+        } else {
+          filename = '3D_Printing_Defect_Inspection_Results_Output.xlsx';
+          if (window.app && app.showToast) {
+            app.showToast('Generating complete Master Excel Report...', 'info');
+          }
+        }
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        let errMessage = 'Failed to generate Excel export.';
+        try {
+          const errData = await response.json();
+          if (errData && errData.error) errMessage = errData.error;
+        } catch (_) {}
+        throw new Error(errMessage);
+      }
+
+      // Check for server-provided filename in Content-Disposition
+      const disposition = response.headers.get('Content-Disposition');
+      if (disposition && disposition.includes('filename=')) {
+        const match = disposition.match(/filename=["']?([^"';]+)["']?/);
+        if (match && match[1]) filename = match[1];
+      }
+
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = downloadUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+      document.body.removeChild(a);
+
+      if (window.app && app.showToast) {
+        app.showToast(`📥 ${filename} downloaded successfully!`, 'success');
+      }
+    } catch (err) {
+      console.error('Excel export error:', err);
+      if (window.app && app.showToast) {
+        app.showToast(err.message || 'Error exporting Excel spreadsheet.', 'error');
+      } else {
+        alert(err.message || 'Error exporting Excel.');
+      }
+    } finally {
+      if (!inspectionId && exportBtn) {
+        exportBtn.innerHTML = originalText;
+        exportBtn.disabled = false;
+      }
+    }
   },
 
   async viewRecord(id) {
@@ -252,8 +359,17 @@ const historyManager = {
           </div>
 
           <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem;">Detection Coordinates</h3>
-          <div class="detections-list-container" style="max-height: 180px;">
+          <div class="detections-list-container" style="max-height: 180px; margin-bottom: 1rem;">
             ${detectionsHtml}
+          </div>
+
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-primary" style="flex: 1;" onclick="historyManager.exportExcel(${rec.id})">
+              📥 Export Inspection #${rec.id} to Excel
+            </button>
+            <button class="btn btn-secondary" onclick="app.closeModal()">
+              Close
+            </button>
           </div>
         </div>
       `;
@@ -285,3 +401,4 @@ const historyManager = {
     }
   }
 };
+

@@ -104,19 +104,65 @@ def delete_inspection_endpoint(inspection_id: int):
 @history_bp.route("/export-excel", methods=["GET"])
 def export_excel_endpoint():
     """
-    Generate and download the complete Excel inspection results output sheet.
+    Generate and download the complete or filtered Excel inspection results output sheet.
+    Supports ?id=123 (single inspection) or ?search=...&type=...&status=...&defect=... (filtered export).
     """
     try:
-        from flask import send_file
-        from export_inspection_results_excel import generate_inspection_output_excel, DEFAULT_OUTPUT_PATH
-        out_path = generate_inspection_output_excel()
+        from flask import send_file, request
+        from backend.utils.export_excel import (
+            generate_master_inspection_excel,
+            generate_single_inspection_excel,
+            get_export_filename,
+        )
+
+        # Check if single inspection requested via query param
+        target_id = request.args.get("id", type=int)
+        if target_id:
+            out_path = generate_single_inspection_excel(target_id)
+            filename = out_path.name
+        else:
+            filters = {
+                "search": request.args.get("search", ""),
+                "type": request.args.get("type", "all"),
+                "status": request.args.get("status", "ALL"),
+                "defect": request.args.get("defect", "all"),
+            }
+            out_path = generate_master_inspection_excel(filters=filters)
+            filename = out_path.name
+
         return send_file(
-            out_path,
+            str(out_path),
             as_attachment=True,
-            download_name="3D_Printing_Defect_Inspection_Results_Output.xlsx",
+            download_name=filename,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
     except Exception as e:
         app_logger.error(f"Error generating Excel export: {e}", exc_info=True)
         return api_error(f"Failed to export Excel: {str(e)}", status_code=500)
+
+
+@history_bp.route("/export-excel/<int:inspection_id>", methods=["GET"])
+def export_single_excel_endpoint(inspection_id: int):
+    """
+    Generate and download an Excel report for a specific single inspection record.
+    """
+    try:
+        from flask import send_file
+        from backend.utils.export_excel import generate_single_inspection_excel
+
+        out_path = generate_single_inspection_excel(inspection_id)
+        filename = f"Inspection_Report_#{inspection_id}.xlsx"
+
+        return send_file(
+            str(out_path),
+            as_attachment=True,
+            download_name=filename,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+    except ValueError as ve:
+        return api_error(str(ve), status_code=404)
+    except Exception as e:
+        app_logger.error(f"Error exporting single inspection #{inspection_id} Excel: {e}", exc_info=True)
+        return api_error(f"Failed to export Excel: {str(e)}", status_code=500)
+
 
