@@ -18,7 +18,24 @@ const liveCamera = {
   saveNextSnapshot: false,
 
   init() {
+    this.dismissError();
     this.checkInitialStatus();
+  },
+
+  async checkInitialStatus() {
+    try {
+      const response = await fetch('/api/camera/status');
+      const res = await response.json();
+      if (res && res.success && res.data && res.data.is_running) {
+        this.streamMode = 'server';
+        const modeSelect = document.getElementById('camera-mode-select');
+        if (modeSelect) modeSelect.value = 'server';
+        this.setStreamingUI(true);
+        this.startStatusPolling();
+      }
+    } catch (e) {
+      console.debug('Initial camera check notice:', e);
+    }
   },
 
   dismissError() {
