@@ -52,18 +52,58 @@ app = create_app()
 application = app  # Standard WSGI alias
 
 
+import socket
+
+
+def is_port_available(port: int, host: str = "0.0.0.0") -> bool:
+    """Check if a port is available for binding."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            s.bind((host, port))
+            return True
+    except OSError:
+        return False
+
+
 def _safe_get_port(default=8080) -> int:
     """Safely resolve numeric port, ignoring literal '$PORT' or invalid strings."""
     raw = os.environ.get("PORT", os.environ.get("FLASK_PORT", str(default)))
-    if isinstance(raw, str) and (raw.startswith("$") or not raw.isdigit()):
-        return default
+    if isinstance(raw, str):
+        raw = raw.strip()
+        if raw.startswith("$"):
+            raw = os.environ.get(raw[1:], str(default))
     try:
         val = int(raw)
-        return val if 1 <= val <= 65535 else default
+        if 1 <= val <= 65535:
+            return val
     except (ValueError, TypeError):
-        return default
+        pass
+    return default
+
+
+def get_bound_port(preferred: int = 8080, host: str = "0.0.0.0") -> int:
+    """Return preferred port if available, or dynamically find the next open port."""
+    if is_port_available(preferred, host):
+        return preferred
+    
+    # In cloud environments with explicit PORT variable, stick to preferred
+    if "PORT" in os.environ and os.environ["PORT"].strip() != "":
+        return preferred
+
+    # Local fallback search across alternate standard ports
+    candidates = [8080, 5000, 8000, 8888, 5001, 8081, 8082, 3000]
+    for p in candidates:
+        if p != preferred and is_port_available(p, host):
+            print(f"[PORT NOTICE] Port {preferred} was in use; automatically selected available port {p}.")
+            return p
+            
+    return preferred
 
 
 if __name__ == "__main__":
-    port_to_bind = _safe_get_port(PORT)
+    initial_port = _safe_get_port(PORT)
+    port_to_bind = get_bound_port(initial_port, "0.0.0.0")
+    print(f"Server starting on http://0.0.0.0:{port_to_bind} (http://localhost:{port_to_bind})")
     app.run(host="0.0.0.0", port=port_to_bind, debug=DEBUG)
+

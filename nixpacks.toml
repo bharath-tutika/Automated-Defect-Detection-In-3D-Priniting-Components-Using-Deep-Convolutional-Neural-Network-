@@ -2,4 +2,4 @@
 nixPkgs = ["python311", "libGL", "glib", "xorg.libxcb", "xorg.libX11", "xorg.libXext", "xorg.libSM"]
 
 [start]
-cmd = "gunicorn -c gunicorn.conf.py app:app"
+cmd = "python app.py"

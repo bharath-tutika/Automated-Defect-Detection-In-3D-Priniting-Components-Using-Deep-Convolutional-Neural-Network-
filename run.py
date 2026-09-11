@@ -73,12 +73,46 @@ def check_system_readiness():
     print("=" * 70 + "\n")
 
 
+import socket
+
+
+def is_port_available(port: int, host: str = "0.0.0.0") -> bool:
+    """Check if a port is available for binding."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            s.bind((host, port))
+            return True
+    except OSError:
+        return False
+
+
+def get_bound_port(preferred: int = 8080, host: str = "0.0.0.0") -> int:
+    """Return preferred port if available, or dynamically find the next open port."""
+    if is_port_available(preferred, host):
+        return preferred
+    
+    # In cloud environments with explicit PORT variable, stick to preferred
+    if "PORT" in os.environ and os.environ["PORT"].strip() != "":
+        return preferred
+
+    candidates = [8080, 5000, 8000, 8888, 5001, 8081, 8082, 3000]
+    for p in candidates:
+        if p != preferred and is_port_available(p, host):
+            print(f"[PORT NOTICE] Port {preferred} was in use; automatically selected available port {p}.")
+            return p
+            
+    return preferred
+
+
 def main():
     check_system_readiness()
     app = create_app()
-    app_logger.info(f"Starting server on http://{HOST}:{PORT}")
-    app.run(host=HOST, port=PORT, debug=DEBUG)
+    active_port = get_bound_port(PORT, HOST)
+    app_logger.info(f"Starting server on http://{HOST}:{active_port}")
+    app.run(host=HOST, port=active_port, debug=DEBUG)
 
 
 if __name__ == "__main__":
     main()
+
