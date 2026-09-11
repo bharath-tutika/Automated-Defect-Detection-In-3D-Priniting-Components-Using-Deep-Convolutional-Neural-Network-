@@ -51,7 +51,19 @@ ensure_directories()
 app = create_app()
 application = app  # Standard WSGI alias
 
+
+def _safe_get_port(default=8080) -> int:
+    """Safely resolve numeric port, ignoring literal '$PORT' or invalid strings."""
+    raw = os.environ.get("PORT", os.environ.get("FLASK_PORT", str(default)))
+    if isinstance(raw, str) and (raw.startswith("$") or not raw.isdigit()):
+        return default
+    try:
+        val = int(raw)
+        return val if 1 <= val <= 65535 else default
+    except (ValueError, TypeError):
+        return default
+
+
 if __name__ == "__main__":
-    # Support dynamic PORT environment variable (e.g., on Railway, Heroku, Render)
-    env_port = int(os.environ.get("PORT", PORT))
-    app.run(host="0.0.0.0", port=env_port, debug=DEBUG)
+    port_to_bind = _safe_get_port(PORT)
+    app.run(host="0.0.0.0", port=port_to_bind, debug=DEBUG)
