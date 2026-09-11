@@ -31,8 +31,8 @@ DEBUG = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "t")
 SECRET_KEY = os.getenv("SECRET_KEY", "3d-printing-defect-detection-secret-key-2026")
 
 # AI Model Configuration
-MODEL_PATH = Path(os.getenv("MODEL_PATH", BASE_DIR / "models" / "trained" / "best.pt"))
-PRETRAINED_MODEL_PATH = Path(os.getenv("PRETRAINED_MODEL_PATH", BASE_DIR / "models" / "pretrained" / "yolo_base.pt"))
+MODEL_PATH = Path(os.getenv("MODEL_PATH", BASE_DIR / "backend" / "models" / "trained" / "best.pt"))
+PRETRAINED_MODEL_PATH = Path(os.getenv("PRETRAINED_MODEL_PATH", BASE_DIR / "backend" / "models" / "pretrained" / "yolo_base.pt"))
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", 0.50))
 IOU_THRESHOLD = float(os.getenv("IOU_THRESHOLD", 0.45))
 IMAGE_SIZE = int(os.getenv("IMAGE_SIZE", 640))
@@ -59,12 +59,13 @@ FRAME_SKIP = int(os.getenv("FRAME_SKIP", 3))
 CAMERA_DEBOUNCE_SECONDS = float(os.getenv("CAMERA_DEBOUNCE_SECONDS", 3.0))
 
 # Upload & File Storage Paths
-UPLOAD_FOLDER = BASE_DIR / "uploads"
+STORAGE_FOLDER = BASE_DIR / "backend" / "storage"
+UPLOAD_FOLDER = STORAGE_FOLDER / "uploads"
 UPLOAD_IMAGES_DIR = UPLOAD_FOLDER / "images"
 UPLOAD_VIDEOS_DIR = UPLOAD_FOLDER / "videos"
 UPLOAD_TEMP_DIR = UPLOAD_FOLDER / "temporary"
 
-RESULT_FOLDER = BASE_DIR / "results"
+RESULT_FOLDER = STORAGE_FOLDER / "results"
 RESULT_IMAGES_DIR = RESULT_FOLDER / "images"
 RESULT_VIDEOS_DIR = RESULT_FOLDER / "videos"
 RESULT_LIVE_FRAMES_DIR = RESULT_FOLDER / "live_frames"
@@ -81,11 +82,11 @@ SQLALCHEMY_DATABASE_URI = f"sqlite:///{DATABASE_PATH.as_posix()}"
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Logging Configuration
-LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR = STORAGE_FOLDER / "logs"
 LOG_FILE = LOGS_DIR / "application.log"
 
 # Training Output Paths
-TRAINING_DIR = BASE_DIR / "training"
+TRAINING_DIR = BASE_DIR / "backend" / "training"
 TRAINING_RESULTS_DIR = TRAINING_DIR / "results"
 METRICS_FILE = TRAINING_RESULTS_DIR / "metrics.txt"
 CONFUSION_MATRIX_FILE = TRAINING_RESULTS_DIR / "confusion_matrix.png"
