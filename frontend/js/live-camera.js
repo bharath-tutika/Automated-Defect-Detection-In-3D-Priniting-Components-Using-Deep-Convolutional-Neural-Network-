@@ -1,6 +1,7 @@
 /**
  * Live Camera Stream and Real-time Telemetry Controller.
- * Supports both Client Browser Webcam (cloud & local friendly) and Server Hardware VideoCapture.
+ * Supports both Client Browser Webcam (including external USB & built-in webcams)
+ * and Server Hardware VideoCapture.
  */
 
 const liveCamera = {
@@ -16,10 +17,99 @@ const liveCamera = {
   statusPollInterval: null,
   recentSnapshots: [],
   saveNextSnapshot: false,
+  availableDevices: [],
 
   init() {
     this.dismissError();
+    this.refreshDeviceList();
     this.checkInitialStatus();
+  },
+
+  onSourceModeChange() {
+    const modeSelect = document.getElementById('camera-mode-select');
+    this.streamMode = modeSelect ? modeSelect.value : 'browser';
+    this.refreshDeviceList();
+  },
+
+  async refreshDeviceList() {
+    const select = document.getElementById('camera-device-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="default">Scanning cameras...</option>';
+
+    const modeSelect = document.getElementById('camera-mode-select');
+    const currentMode = modeSelect ? modeSelect.value : this.streamMode;
+
+    if (currentMode === 'browser') {
+      await this.loadBrowserCameras(select);
+    } else {
+      await this.loadServerCameras(select);
+    }
+  },
+
+  async loadBrowserCameras(selectElement) {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+        selectElement.innerHTML = '<option value="default">Default Camera</option>';
+        return;
+      }
+
+      // Check if we need to request temporary permission to populate human-readable labels
+      let devices = await navigator.mediaDevices.enumerateDevices();
+      let videoDevices = devices.filter(d => d.kind === 'videoinput');
+
+      // If labels are empty, prompt a fast stream to unlock camera device labels
+      if (videoDevices.length > 0 && !videoDevices[0].label) {
+        try {
+          const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+          tempStream.getTracks().forEach(t => t.stop());
+          devices = await navigator.mediaDevices.enumerateDevices();
+          videoDevices = devices.filter(d => d.kind === 'videoinput');
+        } catch (permErr) {
+          console.debug('Temporary label request notice:', permErr);
+        }
+      }
+
+      selectElement.innerHTML = '';
+      if (videoDevices.length === 0) {
+        selectElement.innerHTML = '<option value="default">Default Camera (Auto-detect)</option>';
+        return;
+      }
+
+      videoDevices.forEach((dev, idx) => {
+        const opt = document.createElement('option');
+        opt.value = dev.deviceId || 'default';
+        const label = dev.label || `Camera ${idx + 1} (USB / External)`;
+        opt.textContent = `${idx + 1}. ${label}`;
+        selectElement.appendChild(opt);
+      });
+
+    } catch (err) {
+      console.warn('Error loading browser cameras:', err);
+      selectElement.innerHTML = '<option value="default">Default System Camera</option><option value="external">External USB Camera</option>';
+    }
+  },
+
+  async loadServerCameras(selectElement) {
+    try {
+      const response = await fetch('/api/camera/devices');
+      const res = await response.json();
+      selectElement.innerHTML = '';
+
+      if (res.success && res.data && Array.isArray(res.data.devices) && res.data.devices.length > 0) {
+        res.data.devices.forEach(dev => {
+          const opt = document.createElement('option');
+          opt.value = dev.index;
+          opt.textContent = dev.label || `Server Cam ${dev.index}`;
+          selectElement.appendChild(opt);
+        });
+      } else {
+        selectElement.innerHTML = '<option value="0">Server Cam 0 (Default)</option><option value="1">Server Cam 1 (External USB)</option>';
+      }
+    } catch (err) {
+      console.warn('Error loading server cameras:', err);
+      selectElement.innerHTML = '<option value="0">Server Cam 0 (Default)</option><option value="1">Server Cam 1 (External USB)</option>';
+    }
   },
 
   async checkInitialStatus() {
@@ -61,12 +151,22 @@ const liveCamera = {
         throw new Error('Your browser does not support webcam access or HTTPS is required.');
       }
 
+      const deviceSelect = document.getElementById('camera-device-select');
+      const selectedDeviceId = deviceSelect ? deviceSelect.value : 'default';
+
+      const videoConstraints = {
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      };
+
+      if (selectedDeviceId && selectedDeviceId !== 'default') {
+        videoConstraints.deviceId = { exact: selectedDeviceId };
+      } else {
+        videoConstraints.facingMode = 'environment';
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-          facingMode: 'environment',
-        },
+        video: videoConstraints,
         audio: false,
       });
 
@@ -79,15 +179,17 @@ const liveCamera = {
 
       this.setStreamingUI(true);
       this.startBrowserFrameLoop();
-      app.showToast('Browser webcam connected. Live AI detection active.', 'success');
+
+      const selectedName = deviceSelect && deviceSelect.selectedOptions.length > 0 ? deviceSelect.selectedOptions[0].textContent : 'Camera';
+      app.showToast(`Connected to ${selectedName}. Live AI detection active.`, 'success');
 
     } catch (err) {
       console.error('Browser webcam error:', err);
       let msg = 'Could not access webcam.';
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        msg = 'Camera permission was denied. Please allow camera permissions in your browser URL bar.';
+        msg = 'Camera permission was denied. Please click the lock/camera icon in your browser address bar and allow camera access.';
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        msg = 'No camera device found on this system.';
+        msg = 'Selected external camera was not found. Please verify the USB cable is plugged in.';
       } else {
         msg = err.message || msg;
       }
@@ -188,10 +290,13 @@ const liveCamera = {
 
   async startServerHardwareCamera() {
     try {
+      const deviceSelect = document.getElementById('camera-device-select');
+      const camIdx = deviceSelect ? parseInt(deviceSelect.value, 10) || 0 : 0;
+
       const response = await fetch('/api/camera/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ camera_index: 0 }),
+        body: JSON.stringify({ camera_index: camIdx }),
       });
       const res = await response.json();
 
@@ -204,7 +309,7 @@ const liveCamera = {
 
       this.setStreamingUI(true);
       this.startStatusPolling();
-      app.showToast('Server camera streaming active.', 'success');
+      app.showToast(`Server camera ${camIdx} streaming active.`, 'success');
 
     } catch (err) {
       console.error('Server camera start error:', err);
@@ -239,11 +344,14 @@ const liveCamera = {
     const btnStop = document.getElementById('btn-stop-cam');
     const btnSnap = document.getElementById('btn-snap-cam');
     const modeSelect = document.getElementById('camera-mode-select');
+    const devSelect = document.getElementById('camera-device-select');
 
     if (running) {
       if (streamImg) {
         if (this.streamMode === 'server') {
-          streamImg.src = `/api/camera/stream?t=${new Date().getTime()}`;
+          const deviceSelect = document.getElementById('camera-device-select');
+          const camIdx = deviceSelect ? parseInt(deviceSelect.value, 10) || 0 : 0;
+          streamImg.src = `/api/camera/stream?camera_index=${camIdx}&t=${new Date().getTime()}`;
         }
         streamImg.style.display = 'block';
       }
@@ -257,6 +365,7 @@ const liveCamera = {
       if (btnStop) btnStop.disabled = false;
       if (btnSnap) btnSnap.disabled = false;
       if (modeSelect) modeSelect.disabled = true;
+      if (devSelect) devSelect.disabled = true;
     } else {
       if (streamImg) {
         streamImg.src = '';
@@ -274,6 +383,7 @@ const liveCamera = {
       if (btnStop) btnStop.disabled = true;
       if (btnSnap) btnSnap.disabled = true;
       if (modeSelect) modeSelect.disabled = false;
+      if (devSelect) devSelect.disabled = false;
 
       this.resetTelemetry();
     }
@@ -339,7 +449,11 @@ const liveCamera = {
       confVal.textContent = data.confidence_percentage > 0 ? `${data.confidence_percentage}%` : 'N/A';
     }
     if (countVal) countVal.textContent = data.detection_count ?? (data.detections ? data.detections.length : 0);
-    if (devIdxVal) devIdxVal.textContent = this.streamMode === 'browser' ? 'Browser Cam' : 'Server Cam';
+    if (devIdxVal) {
+      const devSelect = document.getElementById('camera-device-select');
+      const selectedName = devSelect && devSelect.selectedOptions.length > 0 ? devSelect.selectedOptions[0].textContent : (this.streamMode === 'browser' ? 'Browser Cam' : 'Server Cam');
+      devIdxVal.textContent = selectedName.split('(')[0].trim();
+    }
   },
 
   resetTelemetry() {

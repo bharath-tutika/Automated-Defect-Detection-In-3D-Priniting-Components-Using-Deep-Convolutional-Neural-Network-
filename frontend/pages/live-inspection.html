@@ -46,10 +46,20 @@
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 0.35rem;">
             <label for="camera-mode-select" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Source:</label>
-            <select id="camera-mode-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem;">
-              <option value="browser" selected>🌐 Browser Webcam (Cloud / Local)</option>
-              <option value="server">🖥️ Server Hardware Camera</option>
+            <select id="camera-mode-select" onchange="liveCamera.onSourceModeChange()" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem;">
+              <option value="browser" selected>🌐 Browser Webcam (External / Built-in)</option>
+              <option value="server">🖥️ Server Hardware Direct</option>
             </select>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.35rem;">
+            <label for="camera-device-select" style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">Camera:</label>
+            <select id="camera-device-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.3rem 0.5rem; font-size: 0.82rem; min-width: 170px;">
+              <option value="default">Default Camera</option>
+            </select>
+            <button class="btn btn-secondary" id="btn-refresh-cams" title="Scan / Refresh Available Cameras" onclick="liveCamera.refreshDeviceList()" style="padding: 0.3rem 0.55rem; font-size: 0.82rem;">
+              🔄
+            </button>
           </div>
 
           <button class="btn btn-success" id="btn-start-cam" onclick="liveCamera.start()">
