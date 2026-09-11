@@ -17,9 +17,9 @@ import openpyxl
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = PROJECT_ROOT / "database" / "defect_detection.db"
-DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "3D_Printing_Defect_Inspection_Results_Output.xlsx"
+DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "documentation" / "3D_Printing_Defect_Inspection_Results_Output.xlsx"
 
 
 def generate_inspection_output_excel(output_path: Path = DEFAULT_OUTPUT_PATH) -> Path:

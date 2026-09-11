@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["python311", "libGL", "glib", "xorg.libxcb", "xorg.libX11", "xorg.libXext", "xorg.libSM"]
+
+[start]
+cmd = "gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120 app:app"

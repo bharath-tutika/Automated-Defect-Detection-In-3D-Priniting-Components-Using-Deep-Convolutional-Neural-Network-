@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Master Technical Documentation Generator for
 AI-Based Real-Time 3D Printing Defect Detection System.
@@ -446,6 +446,108 @@ def add_section_methodology(doc):
         ["Data Science / Tools", "Pandas, NumPy, Pillow, Matplotlib", "Latest Stable", "Dataset analytics, matrix computation, confusion matrix plots, image I/O."],
     ]
     create_styled_table(doc, headers, data, [1.1, 1.6, 1.2, 2.6])
+    
+    add_custom_heading(doc, "5.2 Project Repository & Directory Structure Architecture", level=2)
+    add_styled_paragraph(
+        doc,
+        "The project follows an enterprise clean architecture paradigm with strict separation of concerns among the deep learning inference engine, "
+        "asynchronous REST microservices, client-side visual telemetry, automated test harnesses, and containerized deployment manifests. "
+        "The complete filesystem layout and file-by-file component breakdown are detailed below:"
+    )
+    
+    # Visual Directory Tree Callout
+    tree_text = (
+        "3D-PRINTING-DEFECT-DETECTION/\n"
+        "├── app.py                          # Root WSGI application entrypoint for Gunicorn\n"
+        "├── wsgi.py                         # WSGI server alias\n"
+        "├── run.py                          # Local development server launcher & routing\n"
+        "├── config.py                       # Global system configuration & hyperparameters\n"
+        "├── requirements.txt                # Python package dependency manifest\n"
+        "├── Procfile / Dockerfile           # Cloud container & process manifests\n"
+        "├── README.md                       # Repository overview & setup instructions\n"
+        "├── backend/                        # Core Python microservice backend\n"
+        "│   ├── app.py                      # Flask factory & blueprint registration\n"
+        "│   ├── database/                   # Database handler & SQLAlchemy models\n"
+        "│   ├── dataset/                    # YOLOv8 dataset annotations & train/val splits\n"
+        "│   ├── detection/                  # Computer vision & YOLOv8 inference engines\n"
+        "│   ├── models/                     # Trained weights (best.pt) & exports\n"
+        "│   ├── notebooks/                  # Jupyter notebooks for data analysis & research\n"
+        "│   ├── preprocessing/              # Image & video frame normalization pipelines\n"
+        "│   ├── routes/                     # REST API endpoint blueprints\n"
+        "│   ├── storage/                    # Upload cache, snapshot frames, & results\n"
+        "│   ├── tests/                      # Automated unit, integration & e2e test suite\n"
+        "│   ├── training/                   # Model training, validation, & metric curves\n"
+        "│   └── utils/                      # Helper utilities (logging, responses, file I/O)\n"
+        "├── database/                       # Relational database persistence\n"
+        "│   └── defect_detection.db         # SQLite ACID persistence database\n"
+        "├── deployment/                     # Production cloud & container configuration\n"
+        "│   ├── Dockerfile                  # Container build instructions\n"
+        "│   ├── Procfile                    # Cloud process runner\n"
+        "│   └── gunicorn.conf.py            # High-concurrency WSGI server settings\n"
+        "├── documentation/                  # Technical monographs, datasets & generators\n"
+        "│   ├── 3D_Printing_Defect_Detection_Technical_Report.docx\n"
+        "│   ├── 3D_Printing_Defect_Detection_Project_Metrics.xlsx\n"
+        "│   ├── 3D_Printing_Defect_Inspection_Results_Output.xlsx\n"
+        "│   ├── generate_master_technical_report.py\n"
+        "│   └── folder_structure.md\n"
+        "└── frontend/                       # Client-side web dashboard & visualizer\n"
+        "    ├── index.html                  # Landing page & navigation hub\n"
+        "    ├── css/                        # Responsive stylesheets & glassmorphism theme\n"
+        "    ├── js/                         # Async API clients, MJPEG streamer & Chart.js\n"
+        "    └── pages/                      # Inspection modules & live monitoring views"
+    )
+    create_callout_box(doc, tree_text, title="REPOSITORY DIRECTORY HIERARCHY", alert_type="note")
+
+    add_custom_heading(doc, "5.2.1 Root Configuration & System Entry Points", level=3)
+    root_headers = ["File / Resource", "Type", "Component Purpose & Responsibilities"]
+    root_data = [
+        ["app.py", "WSGI Entrypoint", "Root application entry point exposing module-level 'app' and 'application' instances for Gunicorn (app:app), Railway, Docker, Render, and Heroku."],
+        ["wsgi.py", "WSGI Alias", "Production WSGI server alias exporting the initialized Flask instance."],
+        ["run.py", "Local Entry Point", "Development server launcher initializing Flask application instance, verifying database schema, setting up static frontend routes, and binding to localhost:5000."],
+        ["config.py", "Python Module", "Centralized configuration defining paths, model weight locations, 7 defect class names, camera index (0), default confidence threshold (0.50), IoU threshold (0.45), and SQLite URI."],
+        ["requirements.txt", "Dependency Spec", "Pinned specification of all Python libraries: Flask, flask-cors, ultralytics, torch, torchvision, opencv-python, pillow, pandas, numpy, sqlalchemy, openpyxl, python-docx, gunicorn."],
+        ["Procfile / Dockerfile", "Deploy Manifests", "Cloud process execution and multi-stage container definitions for automated zero-downtime deployment."],
+        ["README.md", "Documentation", "Project overview, key features, hardware/software prerequisites, quick-start execution guide, and API endpoint documentation."],
+    ]
+    create_styled_table(doc, root_headers, root_data, [1.5, 1.2, 3.8])
+
+    add_custom_heading(doc, "5.2.2 Backend Microservices & Deep Learning Engine", level=3)
+    backend_headers = ["Directory / Subsystem", "Primary Files", "Role in Defect Detection Pipeline"]
+    backend_data = [
+        ["backend/app.py", "app.py, __init__.py", "Application factory configuring CORS headers, error handlers, static asset routing, and registering all five route blueprints."],
+        ["backend/detection/", "detector.py, image_detector.py, video_detector.py, camera_detector.py", "Computer vision core: singleton YOLOv8 model loader, static image bounding box renderer, sequential video frame analyzer, and multi-threaded live camera MJPEG streamer with temporal debounce logging."],
+        ["backend/preprocessing/", "image_preprocessing.py, frame_preprocessing.py", "Input conditioning: letterbox resizing to 640x640, BGR-to-RGB conversion, float32 normalization [0, 1], and contrast optimization."],
+        ["backend/routes/", "image_routes.py, video_routes.py, camera_routes.py, dashboard_routes.py, history_routes.py", "REST API endpoints handling image/video uploads, MJPEG streaming, telemetry metrics, and database audit log querying."],
+        ["backend/database/", "db_handler.py", "SQLAlchemy ORM models (Inspection, DefectLog) managing zero-config SQLite persistence, session scoping, and defect transaction logging."],
+        ["backend/dataset/", "data.yaml, train/ (images, labels), val/ (images, labels)", "YOLO formatted 7-class dataset containing raw image frames and normalized bounding box label annotations for training and validation."],
+        ["backend/models/", "pretrained/yolo_base.pt, trained/best.pt, last.pt, exports/", "Deep learning model checkpoints: baseline pretrained weights, fine-tuned weights (best.pt), and deployment export targets."],
+        ["backend/training/", "train.py, validate.py, evaluate.py, test.py, confusion_matrix.py, generate_starter_dataset.py", "Training and validation harnesses: hyperparameter execution, mAP/Precision/Recall calculation, confusion matrix generation, and loss curve plotting."],
+        ["backend/notebooks/", "01_analysis to 05_live_testing.ipynb", "Jupyter research notebooks for exploratory data analysis, augmentations, training experiments, model evaluation, and webcam diagnostics."],
+        ["backend/tests/", "test_detector.py, test_image.py, test_video.py, test_camera.py, test_database.py, test_api_e2e.py, check_webcam.py", "Automated test suite verifying model inference, API endpoints, camera hardware capture, database transactions, and end-to-end reliability."],
+        ["backend/utils/", "file_handler.py, logger.py, response.py", "Shared utilities for secure filename handling, file validation, color-coded logging, and standardized REST API JSON responses."],
+        ["backend/storage/", "uploads/, results/, snapshots/", "Local storage cache for incoming uploaded files, processed/annotated output media, and live snapshot captures."],
+    ]
+    create_styled_table(doc, backend_headers, backend_data, [1.6, 2.2, 2.7])
+
+    add_custom_heading(doc, "5.2.3 Frontend Web Application & Client Controllers", level=3)
+    frontend_headers = ["Module Area", "Files Included", "User Interface Functionality"]
+    frontend_data = [
+        ["frontend/index.html", "index.html", "Main landing portal and navigation center providing quick access to all inspection modes and system status."],
+        ["frontend/pages/", "dashboard.html, image-inspection.html, video-inspection.html, live-inspection.html, history.html, model-performance.html", "Dedicated application views: real-time analytics dashboard, drag-and-drop image analyzer, video time-lapse inspector, live camera monitor, inspection history table, and deep learning metrics visualizer."],
+        ["frontend/css/", "style.css, dashboard.css, inspection.css, responsive.css", "Modular design system featuring dark glassmorphism styling, responsive flex/grid layouts, custom scrollbars, animated badges, and media queries."],
+        ["frontend/js/", "app.js, dashboard.js, charts.js, image-inspection.js, video-inspection.js, live-camera.js, history.js", "Client-side logic: asynchronous API callers, Chart.js telemetry graphs, HTML5 canvas bounding box overlay renderer, MJPEG stream controller, and history table filtering."],
+        ["frontend/assets/", "icons/, images/, logos/", "Static UI icons, promotional badges, diagram graphics, and brand logo assets."],
+    ]
+    create_styled_table(doc, frontend_headers, frontend_data, [1.5, 2.2, 2.8])
+
+    add_custom_heading(doc, "5.2.4 Persistence, Deployment & Documentation Assets", level=3)
+    infra_headers = ["Directory / Asset", "Files Included", "Operational Role"]
+    infra_data = [
+        ["database/", "defect_detection.db", "Embedded SQLite database maintaining complete relational audit records of all inspection sessions, detected defect classes, confidence scores, and timestamps."],
+        ["deployment/", "Dockerfile, Procfile, gunicorn.conf.py, Aptfile, nixpacks.toml, railway.json, app.py", "Production containerization and cloud orchestration configuration for Gunicorn multi-worker WSGI serving, Docker container builds, and Railway/Heroku deployments."],
+        ["documentation/", "3D_Printing_Defect_Detection_Technical_Report.docx, *.xlsx, *.md, generate_*.py", "Comprehensive technical documentation suite, Excel metrics workbooks, Markdown architectural specifications, and automated report generation scripts."],
+    ]
+    create_styled_table(doc, infra_headers, infra_data, [1.5, 2.2, 2.8])
 
 def add_section_data_collection(doc):
     add_custom_heading(doc, "6. Data Collection Strategy", level=1)
@@ -857,8 +959,13 @@ def build_full_report(output_path: Path):
     add_section_references(doc)
     
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    doc.save(str(output_path))
-    print(f"[SUCCESS] Master Technical Report generated at: {output_path}")
+    try:
+        doc.save(str(output_path))
+        print(f"[SUCCESS] Master Technical Report generated at: {output_path}")
+    except PermissionError:
+        alt_path = output_path.parent / f"{output_path.stem}_Updated.docx"
+        doc.save(str(alt_path))
+        print(f"[NOTICE] Original file was locked by Word. Saved updated report to: {alt_path}")
 
 if __name__ == "__main__":
     out_file = PROJECT_ROOT / "documentation" / "3D_Printing_Defect_Detection_Technical_Report.docx"
